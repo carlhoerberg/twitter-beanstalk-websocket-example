@@ -1,20 +1,21 @@
 require 'rubygems'
-require 'beanstalk-client'
+require 'em-jack'
 require 'twitter/json_stream'
 
 username = ARGV.shift
 password = ARGV.shift
 raise "need username and password" if !username or !password
 
-EventMachine::run {  
+EventMachine::run do  
 	stream = Twitter::JSONStream.connect(
 		:path => '/1/statuses/filter.json?track=iphone',
 		:auth => "#{username}:#{password}"
 	)
 
-	bt = Beanstalk::Pool.new(['localhost:11300'])
+	jack = EMJack::Connection.new
+	jack.use 'twitter'
 
 	stream.each_item do |status|
-		bt.put(status)
+		jack.put(status)
 	end
-}
+end

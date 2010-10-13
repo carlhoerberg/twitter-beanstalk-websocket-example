@@ -7,6 +7,7 @@ EventMachine::WebSocket.start(:host => "127.0.0.1", :port => 8080) do |ws|
 		puts "WebSocket opened"
 
 		jack = EMJack::Connection.new
+		jack.watch 'twitter'
 		jack.each_job do |msg|
 			ws.send msg.body
 			jack.delete msg
