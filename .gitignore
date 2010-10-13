@@ -1,3 +1,5 @@
-bin
-vendor
+*~
+*.swp
+tmp
 .bundle
+Gemfile.lock

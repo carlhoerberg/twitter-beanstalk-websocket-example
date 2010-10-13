@@ -1,21 +1,19 @@
-require 'vendor/gems/environment'
+require 'rubygems'
 require 'em-websocket'
-require 'uuid'
-require 'mq'
+require 'em-jack'
 
-uuid = UUID.new
+EventMachine::WebSocket.start(:host => "127.0.0.1", :port => 8080) do |ws|
+	ws.onopen do
+		puts "WebSocket opened"
 
-EventMachine::WebSocket.start(:host => "0.0.0.0", :port => 8080) do |ws|
-  ws.onopen do
-    puts "WebSocket opened"
+		jack = EMJack::Connection.new
+		jack.each_job do |msg|
+			ws.send msg.body
+			jack.delete msg
+		end
+	end
 
-    twitter = MQ.new
-    twitter.queue(uuid.generate).bind(twitter.fanout('twitter')).subscribe do |t|
-      ws.send t
-    end
-  end
-
-  ws.onclose do
-    puts "WebSocket closed"
-  end
+	ws.onclose do
+		puts "WebSocket closed"
+	end
 end
